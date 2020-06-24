@@ -58,6 +58,8 @@ jobs:
       - name: Update feeds
         run: |
           ./scripts/feeds update -a
+          ./scripts/feeds update oui
+          ./scripts/feeds install -a -p oui
           ./scripts/feeds install -a
 
       - name: Generate configuration file
@@ -203,7 +205,7 @@ jobs:
 
       - name: Compile firmware
         run: |
-          make -j$(nproc) || make -j1 V=s
+          make -j$(nproc) || make -j1 package/feeds/oui/oui-ui-core/compile V=s
           echo "======================="
           echo "Space usage:"
           echo "======================="
