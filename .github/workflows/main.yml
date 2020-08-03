@@ -64,7 +64,6 @@ jobs:
           touch ./.config
           cat >> .config <<EOF          
           CONFIG_TARGET_ar71xx=y
-          CONFIG_TARGET_ath79=y
           CONFIG_TARGET_ar71xx_generic=y
           CONFIG_TARGET_ar71xx_generic_Default=y
           CONFIG_TARGET_BOARD="ar71xx"
