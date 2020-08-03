@@ -58,3 +58,49 @@ jobs:
           ./scripts/feeds update oui
           ./scripts/feeds install -a -p oui
           ./scripts/feeds install -a
+      - name: Generate configuration file
+        run: |
+          rm -f ./.config*
+          touch ./.config
+          cat >> .config <<EOF          
+          CONFIG_TARGET_ar71xx=y
+          CONFIG_TARGET_ath79=y
+          CONFIG_TARGET_ar71xx_generic=y
+          CONFIG_TARGET_ar71xx_generic_Default=y
+          CONFIG_TARGET_BOARD="ar71xx"
+          CONFIG_TARGET_SUBTARGET="generic"
+          CONFIG_TARGET_PROFILE="Default"
+          CONFIG_TARGET_ARCH_PACKAGES="mips_24kc"
+          CONFIG_CPU_TYPE="24kc"
+          EOF
+          sed -i 's/^[ \t]*//g' ./.config
+          make defconfig
+      - name: Make download
+        run: |
+          make download -j8 || make download -j1 V=s
+          find ./dl/ -size -1024c -exec rm -f {} \;
+          df -h
+      - name: Compile firmware
+        run: |
+          make -j$(nproc) || make -j1 V=s
+          echo "======================="
+          echo "Space usage:"
+          echo "======================="
+          df -h
+          echo "======================="
+          du -h ./ --max-depth=1
+          du -h /mnt/openwrt/ --max-depth=1 || true
+      - name: Prepare artifact
+        run: find ./bin/targets/ -type d -name "packages" | xargs rm -rf {}
+
+      - name: Upload config.seed
+        uses: actions/upload-artifact@master
+        with:
+          name: config.seed
+          path: ./bin/targets/*/*/config.seed
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@master
+        with:
+          name: OpenWrt_firmware
+          path: ./bin/targets/
